@@ -1,0 +1,52 @@
+.navUser {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid black;
+  height: 80px;
+  padding-inline: 42px;
+  background: white;
+  font-size: 20px;
+}
+.navUser a {
+  text-decoration: none;
+}
+
+@media (max-width: 520px) {
+  .navUser {
+    padding-inline: 2px;
+    font-size: 16px;
+  }
+}
+
+.navUser > ul {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+@media (max-width: 380px) {
+  .navUser > ul {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+  }
+}
+
+.navLink a {
+  font-size: 25px;
+  font-weight: 600;
+  color: #ff7900;
+  text-decoration: underline;
+}
+.navUserCoins {
+  display: flex;
+  gap: 6px;
+  background: #ededed;
+  border-radius: 100px;
+  align-items: center;
+  padding: 6px 12px;
+}
