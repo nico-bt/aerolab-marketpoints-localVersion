@@ -7,6 +7,7 @@ import styles from "./styles.module.css"
 import fetchAllProducts from "./helper/fetchProductsFromAPI"
 import CountTotalItems from "./CountTotalItems"
 import NextPreviousButtons from "./NextPreviousButtons"
+import { ProductsList } from "@/app/apiData/ProductsStaticList"
 
 export default function Products() {
   const [products, setProducts] = useState([])
@@ -17,22 +18,30 @@ export default function Products() {
 
   // Fetch products
   //---------------------------------------------------------------------------
-  const getAllProducts = async () => {
-    setIsLoading(true)
-    const { data, error } = await fetchAllProducts()
-    if (data) {
-      setProducts(data)
-      setFilteredProducts(data)
-      setIsLoading(false)
-    }
-    if (error) {
-      setError(error)
-      setIsLoading(false)
-    }
-  }
+  // const getAllProducts = async () => {
+  //   setIsLoading(true)
+  //   const { data, error } = await fetchAllProducts()
+  //   if (data) {
+  //     setProducts(data)
+  //     setFilteredProducts(data)
+  //     setIsLoading(false)
+  //   }
+  //   if (error) {
+  //     setError(error)
+  //     setIsLoading(false)
+  //   }
+  // }
 
+  // useEffect(() => {
+  //   getAllProducts()
+  // }, [])
+
+  // Para la versión local traigo los products de un array y cargo imgs local
+  // para no pegarle a la API y web de Aerolab
   useEffect(() => {
-    getAllProducts()
+    setProducts(ProductsList)
+    setFilteredProducts(ProductsList)
+    setIsLoading(false)
   }, [])
 
   //Pagination

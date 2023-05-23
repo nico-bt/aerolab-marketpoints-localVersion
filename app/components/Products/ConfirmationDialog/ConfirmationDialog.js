@@ -10,14 +10,8 @@ import { useUserContext } from "@/app/context/UserContext"
 
 useUserContext
 export default function ConfirmationDialog({ open, setOpen, item }) {
-  const {
-    getUser,
-    redeemItem,
-    redeemItemCancel,
-    isLoading,
-    error,
-    isTransactionOk,
-  } = useUserContext()
+  const { getUser, redeemItem, redeemItemCancel, isLoading, error, isTransactionOk } =
+    useUserContext()
 
   const handleClose = () => {
     if (isTransactionOk) {
@@ -29,7 +23,7 @@ export default function ConfirmationDialog({ open, setOpen, item }) {
   }
 
   const handleGetItem = async () => {
-    redeemItem(item._id)
+    redeemItem(item._id, item)
   }
 
   const CloseBtn = () => {
@@ -81,17 +75,13 @@ export default function ConfirmationDialog({ open, setOpen, item }) {
           {!error && !isTransactionOk && "Redeem Now!"}
 
           {error &&
-            (error === "Internal Server Error"
-              ? "Something went wrong. Try again later"
-              : error)}
+            (error === "Internal Server Error" ? "Something went wrong. Try again later" : error)}
 
           {isTransactionOk && "Item redeemed!"}
         </h2>
 
         <img src={item.img.hdUrl} width={"100%"} alt={`${item.name} image`} />
-        <h2 style={{ margin: 0, marginBottom: "8px", textAlign: "center" }}>
-          {item.name}
-        </h2>
+        <h2 style={{ margin: 0, marginBottom: "8px", textAlign: "center" }}>{item.name}</h2>
         <div
           style={{
             display: "flex",
@@ -104,12 +94,7 @@ export default function ConfirmationDialog({ open, setOpen, item }) {
 
         {!isTransactionOk && !error && (
           <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={handleClose}
-              disabled={isLoading}
-            >
+            <Button variant="outlined" size="large" onClick={handleClose} disabled={isLoading}>
               Cancel
             </Button>
             <Button

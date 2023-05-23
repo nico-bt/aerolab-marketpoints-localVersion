@@ -92,7 +92,7 @@ function History() {
             )
           })}
 
-        {user && user.redeemHistory.length === 0 && (
+        {user && user.redeemHistory.length === 0 && !isLoading && (
           <div className={`${styles.historyItems} ${styles.noItems}`}>No items yet</div>
         )}
       </div>

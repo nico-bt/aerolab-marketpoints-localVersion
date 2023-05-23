@@ -16,14 +16,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={sourceSans.className}>
-        <UserProvider>
+      <UserProvider>
+        <body className={sourceSans.className}>
           <div className="container">
             <Header />
             <main>{children}</main>
           </div>
-        </UserProvider>
-      </body>
+        </body>
+      </UserProvider>
     </html>
   )
 }

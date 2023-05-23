@@ -59,7 +59,7 @@ export default function WelcomeMsg() {
         </DialogContentText>
 
         <DialogContentText sx={styleDialogText}>
-          You can click on the Aerolab Logo
+          You can click on the Logo
           <Image width={50} height={30} src={Logo} alt="Logo image" />
           to charge 5000 points, but only, when you are less than 200 points in your account.
         </DialogContentText>

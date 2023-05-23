@@ -1,6 +1,6 @@
 "use client"
 import { useReducer, useContext, useEffect, createContext } from "react"
-import { BASE_URL, TOKEN } from "../apiData/apiData"
+// import { BASE_URL, TOKEN } from "../apiData/apiData"
 
 // Reducer
 // ***********************************************************
@@ -25,6 +25,7 @@ const reducer = (state, action) => {
         isLoading: false,
         error: false,
         user: action.payload.user,
+        isFirstLoad: action.payload.isFirstLoad,
       }
     case "REGISTER_USER_ERROR":
       return {
@@ -48,12 +49,20 @@ const reducer = (state, action) => {
         error: false,
       }
     case "REDEEM_ITEM_SUCCESS":
-      return {
+      const newState = {
         ...state,
         isLoading: false,
         isTransactionOk: true,
         error: false,
+        user: {
+          ...state.user,
+          points: state.user.points - action.payload.product.cost,
+          redeemHistory: [...state.user.redeemHistory, action.payload.product],
+        },
       }
+      localStorage.setItem("user", JSON.stringify(newState.user))
+      return newState
+
     case "REDEEM_ITEM_ERROR":
       return {
         ...state,
@@ -69,12 +78,16 @@ const reducer = (state, action) => {
         chargingPointsSuccess: false,
       }
     case "ADD_POINTS_SUCCESS":
-      return {
+      const newStateAddedPoints = {
+        chargingPointsSuccess: true,
         ...state,
         isLoading: false,
         chargingPointsSuccess: true,
-        user: { ...state.user, points: action.payload.resData["New Points"] },
+        user: { ...state.user, points: state.user.points + action.payload.addedPoints },
       }
+      localStorage.setItem("user", JSON.stringify(newStateAddedPoints.user))
+      return newStateAddedPoints
+
     case "ADD_POINTS_ERROR":
       return {
         ...state,
@@ -90,13 +103,23 @@ const reducer = (state, action) => {
 
 // Initial State
 // ***********************************************************
+// LOCAL VERSION:
+const INITIAL_USER = {
+  name: "Yo",
+  points: 2000,
+  id: "noImportaElIdLocalVersion",
+  createDate: new Date().toISOString(),
+  redeemHistory: [],
+}
+// const userInLocal = localStorage.getItem("user")
+
 const initialState = {
   isLoading: true,
   error: false,
   isTransactionOk: false,
   chargingPointsSuccess: false,
-  user: null,
-  isFirstLoad: true,
+  user: INITIAL_USER,
+  isFirstLoad: false, // En Local, espero a ver si hay en local storage. Y como inicialmente carga en server, hay que ver localStorage con useEffect
 }
 
 // Context
@@ -110,28 +133,17 @@ const UserProvider = ({ children }) => {
   //-------------------------------------------------------------------------
   const getUser = async () => {
     dispatch({ type: "REGISTER_USER_BEGIN" })
-    try {
-      const res = await fetch(`${BASE_URL}/user/me`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      })
-      const data = await res.json()
-      if (res.ok) {
-        dispatch({ type: "REGISTER_USER_SUCCESS", payload: { user: data } })
-      } else {
-        dispatch({
-          type: "REGISTER_USER_ERROR",
-          payload: { error: data.message },
-        })
-      }
-    } catch (error) {
+
+    const userInLocal = localStorage.getItem("user")
+    if (userInLocal) {
       dispatch({
-        type: "REGISTER_USER_ERROR",
-        payload: { error: error.message },
+        type: "REGISTER_USER_SUCCESS",
+        payload: { user: JSON.parse(userInLocal), isFirstLoad: false },
+      })
+    } else {
+      dispatch({
+        type: "REGISTER_USER_SUCCESS",
+        payload: { user: INITIAL_USER, isFirstLoad: true },
       })
     }
   }
@@ -140,54 +152,13 @@ const UserProvider = ({ children }) => {
     getUser()
   }, [])
 
-  // GET User History
-  //-------------------------------------------------------------------------
-  const getUserHistory = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/user/history`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      })
-      const history = await res.json()
-      console.log(history)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   // REDEEM ITEM
   //-------------------------------------------------------------------------
-  const redeemItem = async (productId) => {
+  const redeemItem = async (productId, product) => {
     dispatch({ type: "REDEEM_ITEM_BEGIN" })
-    try {
-      const res = await fetch(`${BASE_URL}/redeem`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-        body: JSON.stringify({ productId }),
-      })
-      const resData = await res.json()
-      if (res.ok) {
-        dispatch({ type: "REDEEM_ITEM_SUCCESS" })
-      } else {
-        dispatch({
-          type: "REDEEM_ITEM_ERROR",
-          payload: { error: resData.error },
-        })
-      }
-    } catch (error) {
-      dispatch({
-        type: "REDEEM_ITEM_ERROR",
-        payload: { error: error.message },
-      })
-    }
+
+    const productWithDate = { ...product, createDate: new Date().toISOString() }
+    dispatch({ type: "REDEEM_ITEM_SUCCESS", payload: { product: productWithDate } })
   }
 
   const redeemItemCancel = () => {
@@ -200,32 +171,10 @@ const UserProvider = ({ children }) => {
 
   const addPoints = async () => {
     dispatch({ type: "ADD_POINTS_BEGIN" })
-    try {
-      const res = await fetch(`${BASE_URL}/user/points`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-        body: JSON.stringify({ amount: POINTS_AMOUNT }),
-      })
-      const resData = await res.json()
-      console.log(resData)
-      if (res.ok) {
-        dispatch({ type: "ADD_POINTS_SUCCESS", payload: { resData } })
-      } else {
-        dispatch({
-          type: "ADD_POINTS_ERROR",
-          payload: { error: resData.error },
-        })
-      }
-    } catch (error) {
-      dispatch({
-        type: "ADD_POINTS_ERROR",
-        payload: { error: error.message },
-      })
-    }
+    // Para simular la call a la API y resetear el chargingPointsSuccess a false con el dispatch de arriba
+    setTimeout(() => {
+      dispatch({ type: "ADD_POINTS_SUCCESS", payload: { addedPoints: POINTS_AMOUNT } })
+    }, 100)
   }
 
   // Set First Load
@@ -241,7 +190,6 @@ const UserProvider = ({ children }) => {
         redeemItemCancel,
         redeemItem,
         getUser,
-        getUserHistory,
         addPoints,
         setFirstLoadFalse,
       }}
